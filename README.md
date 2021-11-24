@@ -1,4 +1,4 @@
-<h1 align="center"># Meu-primeiro-programa-em-C</h1>
+<h1 align="center">Meu-primeiro-programa-em-C</h1>
 
 Esse é um programa que fiz para um projeto de trabalho da faculdade.
 
