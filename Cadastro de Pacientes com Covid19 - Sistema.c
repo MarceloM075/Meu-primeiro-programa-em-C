@@ -184,15 +184,15 @@ void cadastroPaciente(){
 
         printf(" Dia do nascimento: ");
         fflush(stdin);
-        scanf("%d", &paciente[id].diaNascimento);
+        scanf("%2d", &paciente[id].diaNascimento);
 
         printf(" Mes do nascimento: ");
         fflush(stdin);
-        scanf("%d", &paciente[id].mesNascimento);
+        scanf("%2d", &paciente[id].mesNascimento);
 
         printf(" Ano do nascimento: ");
         fflush(stdin);
-        scanf("%d", &paciente[id].anoNascimento);
+        scanf("%4d", &paciente[id].anoNascimento);
 
         //calculo da idade do paciente.
         idade = anoAtual-paciente[id].anoNascimento;
@@ -212,15 +212,15 @@ void cadastroPaciente(){
 
         printf(" Dia do diagnostico: ");
         fflush(stdin);
-        scanf("%d", &paciente[id].diaDiagnostico);
+        scanf("%2d", &paciente[id].diaDiagnostico);
 
         printf(" Mes do diagnostico: ");
         fflush(stdin);
-        scanf("%d", &paciente[id].mesDiagnostico);
+        scanf("%2d", &paciente[id].mesDiagnostico);
 
         printf(" Ano do diagnostico: ");
         fflush(stdin);
-        scanf("%d", &paciente[id].anoDiagnostico);
+        scanf("%4d", &paciente[id].anoDiagnostico);
 
         printf("\n\n Diabetes?(sim/nao) ");
         fflush(stdin);
