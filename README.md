@@ -7,7 +7,7 @@ Esse é um programa que fiz para um projeto de trabalho da faculdade.
 Após feito o login no sistema, aparecerá um menu com as opções para cadastrar, pesquisar paciente já cadastrado (via CPF), listar todos os pacientes cadastrados e deletar algum cadastro.
 
 ### Login e senha
-Login: admin
+Login: admin <br/>
 Senha: 123
 
 É possível fazer a alteração do login e senha abrindo o código fonte e alterando o valor de user e password (linhas 6 e 7, respectivamente).
