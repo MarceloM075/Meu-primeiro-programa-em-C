@@ -3,91 +3,86 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define maxPacientes 1000 //número máximo de pacientes para cadastro.
-char user[31] = "admin"; //coloque aqui o usuário padrão desejado, podendo conter no máximo 30 caractéres.
-char password[31] = "123"; //coloque aqui a senha padrão desejada, podendo conter no máximo 30 caractéres.
+char user[31] = "admin"; //coloque aqui o nome de usuário desejado, podendo conter no máximo 30 caractéres.
+char password[31] = "123"; //coloque aqui a senha desejada, podendo conter no máximo 30 caractéres.
 
 FILE *arquivoPaciente;
 FILE *arquivoRisco;
-FILE *quantPacientesCovid;
 
-static int id;//indice para manipular as informações de cada paciente.
-int idade;//variável para fazer o calculo da idade do paciente.
-int diaAtual, mesAtual, anoAtual;//variável para a data atual do sistema.
+static int idade; //variável para fazer o calculo da idade do paciente.
+int diaAtual, mesAtual, anoAtual; //variável para armazenar a data atual do sistema.
 
-//armazenamento dos dados de cadastro dos pacientes.
 typedef struct {
     char nome[50], rua[50], bairro[50], cidade[50], estado[50], email[50];
     char cpf[15], cep[10], telefone[13];
     int diaDiagnostico, mesDiagnostico, anoDiagnostico,  diaNascimento, mesNascimento, anoNascimento, numeroCasa, idadePaciente;
     char diabetes[4], obesidade[4], hipertensao[4], tuberculose[4];
 }dados_paciente;
-dados_paciente paciente[maxPacientes];
-//fim do armazenamento dos dados dos pacientes.
+dados_paciente paciente;
 
-//código main.
+
 int main(void){
-    int opcaoMenu;//variável para a manipulação do menu de opções.
-    int permissaoEntrada = entradaSistema();//faz a chamada da função entradaSistema e atribui o seu retorno a permissaoEntrada.
+    int opcaoMenu; //variável para a manipulação do menu de opções.
+    int permissaoEntrada = entradaSistema();
 
-    //struct para pegar a data atual do sistema. <time.h>.
     time_t meuTempo;
     meuTempo = time(NULL);
     struct tm data = *localtime(&meuTempo);
     anoAtual = data.tm_year+1900;
     mesAtual = data.tm_mon+1;
     diaAtual = data.tm_mday;
-    //fim da struct de data atual.
 
     if (permissaoEntrada == 1){
         do{
-            system("cls");//limpa as mensagens da tela.
+            system("cls"); //limpa as mensagens da tela.
             printf("========================== Bem-Vindo ==========================\n\n");
             printf("======================= MENU PRINCIPAL ========================");
             printf("\n                       Data: %d/%d/%d\n\n\n", diaAtual, mesAtual, anoAtual);
-            printf(" Digite o numero equivalente para a opcao que deseja acessar:\n 1 - Cadastrar paciente\n 2 - Pesquisar pacientes cadastrados (pesquisa por CPF)\n 3 - Deletar algum paciente cadastrado\n 4 - Sair\n\n");
-            fflush(stdin);//limpa o buffer do teclado, que pode conter alguma informação armazernada.
+            printf(" Digite o numero equivalente para a opcao que deseja acessar:\n 1 - Cadastrar paciente\n 2 - Listar todos os pacientes cadastrados\n 3 - Pesquisar paciente pelo CPF\n 4 - Deletar dados do pacinte pelo CPF\n 5 - Sair\n\n");
+            fflush(stdin); //limpa o buffer do teclado, que pode conter alguma informação armazernada.
             scanf("%d", &opcaoMenu);
             switch(opcaoMenu){
-                case 1://chama a função cadastroPaciente caso o usuário digite a opção 1.
+                case 1:
                     cadastroPaciente();
                 break;
-                case 2://chama a função listarPacientes caso o usuário digite a opção 2.
+                case 2:
                     listarPacientes();
                 break;
-                case 3://chama a função deletarCadastro caso o usuário digite a opção 3.
+                case 3:
+                    pesquisarCpf();
+                break;
+                case 4:
                     deletarCadastro();
                 break;
-                case 4://fecha o sistema caso o usuário digite a opção 4.
+                case 5:
                     system("exit");
                 break;
-                default://caso o usuário não digite nenhuma das opções (1, 2 ou 3), o sistema informa que foi uma opção inválida.
+                default:
                     printf(" Opcao invalida\n\n");
                     system("pause");
                 break;
             }
-        }while(opcaoMenu!=4);
+        }while(opcaoMenu!=5);
     }
     return 0;
 }
-//fim do código main.
 
-//inicio do código de login.
 int entradaSistema(){
-    char usuarioPadrao[30], senhaPadrao[30];//usuario pre-cadastrado e senha pre-cadastrada.
-    char login[30], senha[30];//variáveis usadas para logar no sistema.
-    int retornoLogin, retornoSenha;//verificacao do login e da senha.
-    int contaExistente;//variavel que permite ou nao a entrada no sistema.
+    char usuarioPadrao[30], senhaPadrao[30];
+    char login[30], senha[30];
+    int retornoLogin, retornoSenha;
+    int contaExistente;
     
-    strcpy(usuarioPadrao, user);//atribui user a variavel usuarioPadrao.
-    strcpy(senhaPadrao, password);//atribui password a variavel senhaPadrao.
-    do{//irá executar até que o login e senha estejam corretos.
+    strcpy(usuarioPadrao, user);
+    strcpy(senhaPadrao, password);
+
+    do{
         printf(" Digite seu login: ");
         scanf("%s", login);
         printf(" Digite sua senha: ");
         scanf("%s", senha);
-        retornoLogin = strcmp(usuarioPadrao, login);//retorna o valor 0 quando os 2 argumentos sao iguais.
-        retornoSenha = strcmp(senhaPadrao, senha);//retorna o valor 0 quando os 2 argumentos sao iguais.
+        retornoLogin = strcmp(usuarioPadrao, login);
+        retornoSenha = strcmp(senhaPadrao, senha);
 
         if ((retornoLogin == 0) && (retornoSenha == 0)){
             contaExistente=1;
@@ -96,360 +91,343 @@ int entradaSistema(){
             printf(" Login e/ou senha invalidos.\nTente novamente.\n");
         }
     }while(contaExistente==0); 
-
     return contaExistente;
 }   
-//fim do cógido de login.
 
-//inicio do código para o cadastro dos pacientes.
 void cadastroPaciente(){
-    int opcaoMenuCadastro;//variável para a manipulação do cadastro.
-    int quantPacientes = 0;//variável para definir o valor da quantidade de pacientes caso não exista um arquivo ou um valor salvo.
-    char nomeArquivo[50];//variável para salvar o nome do arquivo, antes de criar o arquivo.
-    char txt[] = ".txt";//complemento do nome do arquivo.
+    int opcaoMenuCadastro;
 
     system("cls");
-
-    quantPacientesCovid = fopen("Quantidade de pacientes com Covid19.bin", "rb");//abre o arquivo que mantém salvo a quantidade de pacientes cadastrados.
-
-    //inicio do teste de abertura do arquivo que armazena a quantida de pacientes cadastrados.
-    if(quantPacientesCovid == NULL){
-        quantPacientesCovid = fopen("Quantidade de pacientes com Covid19.bin", "wb");
-        fwrite(&quantPacientes, sizeof(quantPacientes), 5, quantPacientesCovid);
-        printf(" Erro ao ler o numero de pacientes cadastrados!\n");
-        printf(" Tentando criar o arquivo 'Quantidade de pacientes com Covid19.bin'...\n\n");
-        printf(" Tente novamente, por favor!\n\n");
-        system("pause");
-        fclose(quantPacientesCovid);
-        return 1;
-    }else{
-        fread(&id, sizeof(id), 5, quantPacientesCovid);
-        fclose(quantPacientesCovid);
-        printf("              %d pacientes cadastrados\n", id);
-    }
-    //fim do teste de abertura do arquivo.
-
-    //teste para saber se a quantidade de pacientes cadastrados já não está no limite.
-    if (id >= maxPacientes){
-        printf("\n Limite de pacientes cadastrados alcancado.\n");
-        printf(" Obrigado! Retornando ao menu principal...");
-        system("pause");
-        opcaoMenuCadastro = 0;
-        return opcaoMenuCadastro;
-    }
-    //fim do teste.
-
-    //incio do cadastro dos pacientes.
     do{
-        printf("\n---------- Insira as informacoes do paciente %d ----------\n", id+1);
+        printf("\n---------- Insira as informacoes do paciente ----------\n");
                 
         printf("\n Nome: ");
         fflush(stdin);
-        scanf("%50[^\n]", paciente[id].nome);
+        scanf("%50[^\n]", paciente.nome);
             
         printf(" CPF (apenas numeros): ");
         fflush(stdin);
-        scanf("%s", nomeArquivo);
-        strcpy(paciente[id].cpf, nomeArquivo);
+        scanf("%s", paciente.cpf);
         cpfPadronizador();
 
         printf(" Telefone: ");
         fflush(stdin);
-        scanf("%12[^\n]", paciente[id].telefone);
+        scanf("%12[^\n]", paciente.telefone);
 
         printf(" Rua: ");
         fflush(stdin);
-        scanf("%50[^\n]", paciente[id].rua);
+        scanf("%50[^\n]", paciente.rua);
 
         printf(" Numero da casa: ");
         fflush(stdin);
-        scanf("%d", &paciente[id].numeroCasa);
+        scanf("%d", &paciente.numeroCasa);
 
         printf(" Bairro: ");
         fflush(stdin);
-        scanf("%50[^\n]", paciente[id].bairro);
+        scanf("%50[^\n]", paciente.bairro);
 
         printf(" Cidade: ");
         fflush(stdin);
-        scanf("%50[^\n]", paciente[id].cidade);;
+        scanf("%50[^\n]", paciente.cidade);;
 
         printf(" Estado: ");
         fflush(stdin);
-        scanf("%50[^\n]", paciente[id].estado);
+        scanf("%50[^\n]", paciente.estado);
 
         printf(" CEP (apenas numeros): ");
         fflush(stdin);
-        scanf("%9[^\n]", paciente[id].cep);
+        scanf("%9[^\n]", paciente.cep);
         cepPadronizador();
 
         printf(" Dia do nascimento: ");
         fflush(stdin);
-        scanf("%2d", &paciente[id].diaNascimento);
+        scanf("%2d", &paciente.diaNascimento);
 
         printf(" Mes do nascimento: ");
         fflush(stdin);
-        scanf("%2d", &paciente[id].mesNascimento);
+        scanf("%2d", &paciente.mesNascimento);
 
         printf(" Ano do nascimento: ");
         fflush(stdin);
-        scanf("%4d", &paciente[id].anoNascimento);
+        scanf("%4d", &paciente.anoNascimento);
 
-        //calculo da idade do paciente.
-        idade = anoAtual-paciente[id].anoNascimento;
-        if(mesAtual<paciente[id].mesNascimento){
+        idade = anoAtual-paciente.anoNascimento;
+        if(mesAtual<paciente.mesNascimento){
             idade -= 1;
-        }else if(mesAtual==paciente[id].mesNascimento){
-            if(diaAtual<paciente[id].diaNascimento){
+        }else if(mesAtual==paciente.mesNascimento){
+            if(diaAtual<paciente.diaNascimento){
                 idade -= 1;
             }
         }
-        paciente[id].idadePaciente = idade;
-        //fim do calculo da idade do paciente.
+        paciente.idadePaciente = idade;
 
         printf(" Email: ");
         fflush(stdin);
-        scanf("%50[^\n]", paciente[id].email);
+        scanf("%50[^\n]", paciente.email);
 
         printf(" Dia do diagnostico: ");
         fflush(stdin);
-        scanf("%2d", &paciente[id].diaDiagnostico);
+        scanf("%2d", &paciente.diaDiagnostico);
 
         printf(" Mes do diagnostico: ");
         fflush(stdin);
-        scanf("%2d", &paciente[id].mesDiagnostico);
+        scanf("%2d", &paciente.mesDiagnostico);
 
         printf(" Ano do diagnostico: ");
         fflush(stdin);
-        scanf("%4d", &paciente[id].anoDiagnostico);
+        scanf("%4d", &paciente.anoDiagnostico);
 
         printf("\n\n Diabetes?(sim/nao) ");
         fflush(stdin);
-        scanf("%3[^\n]", paciente[id].diabetes);
+        scanf("%3[^\n]", paciente.diabetes);
 
         printf(" Hipertensao?(sim/nao) ");
         fflush(stdin);
-        scanf("%3[^\n]", paciente[id].hipertensao);
+        scanf("%3[^\n]", paciente.hipertensao);
 
         printf(" Tuberculose?(sim/nao) ");
         fflush(stdin);
-        scanf("%3[^\n]", paciente[id].tuberculose);
+        scanf("%3[^\n]", paciente.tuberculose);
 
         printf(" Obesidade?(sim/nao) ");
         fflush(stdin);
-        scanf("%3[^\n]", paciente[id].obesidade);
+        scanf("%3[^\n]", paciente.obesidade);
 
-        strcat(nomeArquivo, txt);
+        arquivoPaciente = fopen("Pacientes cadastrados.bin", "ab");
 
-        arquivoPaciente = fopen(nomeArquivo, "w");
-
-        fprintf(arquivoPaciente, " Nome: %s\n", paciente[id].nome);
-        fprintf(arquivoPaciente, " CPF: %s\n", paciente[id].cpf);
-        fprintf(arquivoPaciente, " Telefone: %s\n", paciente[id].telefone);
-        fprintf(arquivoPaciente, " Endereco: Rua: %s, No.: %d, %s - %s/%s\n", paciente[id].rua, paciente[id].numeroCasa, paciente[id].bairro, paciente[id].cidade, paciente[id].estado);
-        fprintf(arquivoPaciente, " CEP: %s\n", paciente[id].cep);
-        fprintf(arquivoPaciente, " Nascimento: %d/%d/%d\n", paciente[id].diaNascimento, paciente[id].mesNascimento, paciente[id].anoNascimento);
-        fprintf(arquivoPaciente, " Idade: %d\n", paciente[id].idadePaciente);
-        fprintf(arquivoPaciente, " Email: %s\n", paciente[id].email);
-        fprintf(arquivoPaciente, " Data do diagnostico: %d/%d/%d\n", paciente[id].diaDiagnostico, paciente[id].mesDiagnostico, paciente[id].anoDiagnostico);
-        fprintf(arquivoPaciente, " Diabetes: %s\n", paciente[id].diabetes);
-        fprintf(arquivoPaciente, " Hipertensao: %s\n", paciente[id].hipertensao);
-        fprintf(arquivoPaciente, " Tuberculose: %s\n", paciente[id].tuberculose);
-        fprintf(arquivoPaciente, " Obesidade: %s\n", paciente[id].obesidade);
+        if (arquivoPaciente == NULL){
+            printf("\nProblemas ao tentar abrir o arquivo para salvar os dados!\n");
+        }else{
+            fwrite(&paciente, sizeof(dados_paciente), 1, arquivoPaciente);
+        }
 
         fclose(arquivoPaciente);
 
         retornoRisco();
 
-        id++;
-        quantPacientesCovid = fopen("Quantidade de pacientes com Covid19.bin", "wb");
-        fwrite(&id, sizeof(id), 5, quantPacientesCovid);
-        fclose(quantPacientesCovid);
         printf("\n\n");
         printf(" Deseja cadastrar mais pacientes? Digite 1 para sim ou qualquer outro numero para nao.\n\n");
         fflush(stdin);
         scanf("%d", &opcaoMenuCadastro);
 
     }while(opcaoMenuCadastro == 1);
-    //fim do cadastro dos pacientes.
-    fclose(arquivoPaciente);
-
 }
-//fim do código de cadastro dos pacientes.
 
-//código para salvar os dados dos pacientes do grupo de risco.
 void retornoRisco(){
     int retornoDiabetes, retornoHipertensao, retornoTuberculose, retornoObesidade;//variavel para a verificação do valor de .diabetes, .hipertensao, .tuberculose e .obesidade.
 
-    if( (strcmp(paciente[id].diabetes, "sim")) || (strcmp(paciente[id].diabetes, "Sim")) || (strcmp(paciente[id].diabetes, "SIM"))){
+    if( strcmp(paciente.diabetes, "sim") == 0 || strcmp(paciente.diabetes, "Sim") == 0 || strcmp(paciente.diabetes, "SIM") == 0){
         retornoDiabetes = 1;
     }else{
         retornoDiabetes = 0;
     }
 
-    if( (strcmp(paciente[id].hipertensao, "sim")) || (strcmp(paciente[id].hipertensao, "Sim")) || (strcmp(paciente[id].hipertensao, "SIM"))){
+    if( strcmp(paciente.hipertensao, "sim") == 0 || strcmp(paciente.hipertensao, "Sim") == 0 || strcmp(paciente.hipertensao, "SIM") == 0){
         retornoHipertensao = 1;
     }else{
         retornoHipertensao = 0;
     }
 
-    if( (strcmp(paciente[id].tuberculose, "sim")) || (strcmp(paciente[id].tuberculose, "Sim")) || (strcmp(paciente[id].tuberculose, "SIM"))){
+    if( strcmp(paciente.tuberculose, "sim") == 0 || strcmp(paciente.tuberculose, "Sim") == 0 || strcmp(paciente.tuberculose, "SIM") == 0){
         retornoTuberculose = 1;
     }else{
         retornoTuberculose = 0;
     }
 
-    if( (strcmp(paciente[id].obesidade, "sim")) || (strcmp(paciente[id].obesidade, "Sim")) || (strcmp(paciente[id].obesidade, "SIM"))){
+    if( strcmp(paciente.obesidade, "sim") == 0 || strcmp(paciente.obesidade, "Sim") == 0 || strcmp(paciente.obesidade, "SIM") == 0){
         retornoObesidade = 1;
     }else{
         retornoObesidade = 0;
     }
 
-    //teste da abertura do arquivo de Grupo de Risco.
     arquivoRisco = fopen("Grupo de Risco.txt", "a");
     if(arquivoRisco == NULL){
         printf("\n Erro ao tentar abrir o arquivo Grupo de Risco!");
         printf("\n Tentando criar o arquivo...\n\n");
         arquivoRisco = fopen("Grupo de Risco", "w");
     }
-    //fim do teste da abertura do arquivo de Grupo de Risco.
 
-    //teste para saber se o paciente pertence ao grupo de risco e salvamento no arquivo.
-    if((idade >= 65) || (retornoHipertensao == 1) || (retornoTuberculose == 1) || (retornoObesidade == 1)){
+    if(idade >= 65 || retornoDiabetes == 1 || retornoHipertensao == 1 || retornoObesidade == 1 || retornoTuberculose == 1){
         fprintf(arquivoRisco, "-------------------------------------------------------\n"); 
-        fprintf(arquivoRisco, " Nome do paciente: %s\n", paciente[id].nome);
-        fprintf(arquivoRisco, " CEP: %s", paciente[id].cep);
-        fprintf(arquivoRisco, "\n Idade: %d\n", paciente[id].idadePaciente);
+        fprintf(arquivoRisco, " Nome do paciente: %s\n", paciente.nome);
+        fprintf(arquivoRisco, " CEP: %s", paciente.cep);
+        fprintf(arquivoRisco, "\n Idade: %d\n", paciente.idadePaciente);
         fprintf(arquivoRisco, "-------------------------------------------------------\n\n");            
     }
-    //fim do teste para saber se o paciente pertence ao grupo de risco e salvamento no arquivo.
     fclose(arquivoRisco);
 }
-//fim do código para salvar os dados dos pacientes do grupo de risco.
 
-//código para transformar o CPF de apenas números no padrao xxx.xxx.xxx-xx.
 void cpfPadronizador(){
     char traco = '-';
     char ponto = '.';
 
-    paciente[id].cpf[13] = paciente[id].cpf[10];
-    paciente[id].cpf[12] = paciente[id].cpf[9];
+    paciente.cpf[13] = paciente.cpf[10];
+    paciente.cpf[12] = paciente.cpf[9];
 
-    paciente[id].cpf[10] = paciente[id].cpf[8];
-    paciente[id].cpf[9] = paciente[id].cpf[7];
-    paciente[id].cpf[8] = paciente[id].cpf[6];
+    paciente.cpf[10] = paciente.cpf[8];
+    paciente.cpf[9] = paciente.cpf[7];
+    paciente.cpf[8] = paciente.cpf[6];
 
-    paciente[id].cpf[6] = paciente[id].cpf[5];
-    paciente[id].cpf[5] = paciente[id].cpf[4];
-    paciente[id].cpf[4] = paciente[id].cpf[3];
+    paciente.cpf[6] = paciente.cpf[5];
+    paciente.cpf[5] = paciente.cpf[4];
+    paciente.cpf[4] = paciente.cpf[3];
 
-    paciente[id].cpf[11] = traco;
-    paciente[id].cpf[7] = ponto;
-    paciente[id].cpf[3] = ponto;
+    paciente.cpf[11] = traco;
+    paciente.cpf[7] = ponto;
+    paciente.cpf[3] = ponto;
 }
-//fim do código padronizador de CPF.
 
-//código para transformar o cep de apenas números no padrão xxxxx-xxx.
 void cepPadronizador(){
     char traco = '-';
 
-    paciente[id].cep[8] = paciente[id].cep[7];
-    paciente[id].cep[7] = paciente[id].cep[6];
-    paciente[id].cep[6] = paciente[id].cep[5];
+    paciente.cep[8] = paciente.cep[7];
+    paciente.cep[7] = paciente.cep[6];
+    paciente.cep[6] = paciente.cep[5];
 
-    paciente[id].cep[5] = traco;
+    paciente.cep[5] = traco;
 }
-//fim do código padronizador de CEP.
 
-//código para listar os dados de um paciente pesquisando pelo CPF.
 void listarPacientes(){
-    char cpfPesquisa[50];
-    char txt[] = ".txt";
-    char lerDados[5000];
-    int opcaoMenu;
+    system("cls");
+    arquivoPaciente = fopen("Pacientes cadastrados.bin", "rb");
 
-    do{
-        system("cls");
-        printf(" Digite o numero do CPF do paciente para a pesquisa (apenas numeros): \n");
-        fflush(stdin);
-        scanf("%s", cpfPesquisa);
-        
-        strcat(cpfPesquisa, txt);
-
-        arquivoPaciente = fopen(cpfPesquisa, "r");
-
-        if (arquivoPaciente == NULL){
-            printf("\n Nao foi possivel abrir o arquivo!\n");
-            printf(" Verifique se o CPF esta correto!\n\n\n");
-            system("pause");
-            return 1;
+    if(arquivoPaciente == NULL){
+        printf("\nProblemas ao ler os pacientes cadastrados!\n");
+        system("pause");
+    }else{
+        while( fread(&paciente, sizeof(dados_paciente), 1, arquivoPaciente) == 1){
+            printf("\n Nome: %s\n", paciente.nome);
+            printf(" CPF: %s\n", paciente.cpf);
+            printf(" Telefone: %s\n", paciente.telefone);
+            printf(" Endereco: Rua: %s, No.: %d, %s - %s/%s\n", paciente.rua, paciente.numeroCasa, paciente.bairro, paciente.cidade, paciente.estado);
+            printf(" CEP: %s\n", paciente.cep);
+            printf(" Data de Nascimento: %d/%d/%d\n", paciente.diaNascimento, paciente.mesNascimento, paciente.anoNascimento);
+            printf(" Idade: %d\n", paciente.idadePaciente);
+            printf(" Email: %s\n", paciente.email);
+            printf(" Data do Diagnostico: %d/%d/%d\n", paciente.diaDiagnostico, paciente.mesDiagnostico, paciente.anoDiagnostico);
+            printf(" Diabetes: %s\n", paciente.diabetes);
+            printf(" Hipertensao: %s\n", paciente.hipertensao);
+            printf(" Tuberculose: %s\n", paciente.tuberculose);
+            printf(" Obesidade: %s\n", paciente.obesidade);
+            printf("--------------------------------------------------\n\n");
         }
-
-        system("cls");
-        while (fgets(lerDados, 5000, arquivoPaciente) != NULL){
-            printf("%s", lerDados);
-        }
-        fclose(arquivoPaciente);
-        printf("\n\n Deseja visualizar os dados de mais pacientes? Digite 1 para sim ou qualquer outro numero para nao.\n\n");
-        fflush(stdin);
-        scanf("%d", &opcaoMenu);
-
-    }while (opcaoMenu == 1);
-
+    }
+    fclose(arquivoPaciente);
+    system("pause");
 }
-//fim do código de pesquisa.
 
-//código para deletar os dados dos pacientes.
+void pesquisarCpf(){
+    system("cls");
+    char cpf[15];
+
+    arquivoPaciente = fopen("Pacientes cadastrados.bin", "rb");
+
+    if(arquivoPaciente == NULL){
+        printf("\nProblemas ao ler os dados dos pacientes cadastrados!\n");
+        system("pause");
+    }else{
+        fflush(stdin);
+        printf("Digite o CPF do paciente: ");
+        scanf("%s", paciente.cpf);
+        cpfPadronizador();
+        strcpy(cpf, paciente.cpf);
+
+        while( fread(&paciente, sizeof(dados_paciente), 1, arquivoPaciente) == 1){
+            if(strcmp(paciente.cpf, cpf) != 0){
+                printf("\n Numero de CPF nao encontrado!\n\n");
+                goto fimpesquisar;
+            }
+            if( strcmp (paciente.cpf, cpf) == 0){
+                printf("\n Nome: %s\n", paciente.nome);
+                printf(" CPF: %s\n", paciente.cpf);
+                printf(" Telefone: %s\n", paciente.telefone);
+                printf(" Endereco: Rua: %s, No.: %d, %s - %s/%s\n", paciente.rua, paciente.numeroCasa, paciente.bairro, paciente.cidade, paciente.estado);
+                printf(" CEP: %s\n", paciente.cep);
+                printf(" Data de Nascimento: %d/%d/%d\n", paciente.diaNascimento, paciente.mesNascimento, paciente.anoNascimento);
+                printf(" Idade: %d\n", paciente.idadePaciente);
+                printf(" Email: %s\n", paciente.email);
+                printf(" Data do Diagnostico: %d/%d/%d\n", paciente.diaDiagnostico, paciente.mesDiagnostico, paciente.anoDiagnostico);
+                printf(" Diabetes: %s\n", paciente.diabetes);
+                printf(" Hipertensao: %s\n", paciente.hipertensao);
+                printf(" Tuberculose: %s\n", paciente.tuberculose);
+                printf(" Obesidade: %s\n", paciente.obesidade);
+                printf("--------------------------------------------------\n\n");
+            }
+        }
+    }
+    fimpesquisar:
+    fclose(arquivoPaciente);
+    system("pause");
+}
+
+
 void deletarCadastro(){
-    char nomeArquivo[50];
-    char txt[] = ".txt";
-    char lerDados[5000];
+
+    FILE *deletarDados;
     int confirmacaoDados;
     int opcaoMenu;
     int quantPacientes = 0;
+    int cpf[15];
 
     do{
-        system("cls");
-        printf(" Digite o numero do CPF do paciente que deseja apagar os dados (apenas numeros): \n");
-        fflush(stdin);
-        scanf("%s", nomeArquivo);
+        arquivoPaciente = fopen("Pacientes cadastrados.bin", "rb");
+        deletarDados = fopen("temp.bin", "wb");
 
-        strcat(nomeArquivo, txt);
+        if(arquivoPaciente == NULL && deletarDados == NULL){
+            printf("\n Problemas ao ler o arquivo de dados!\n");
+            system("pause");
+        }else{
+            system("cls");
+            printf(" Digite o numero do CPF do paciente que deseja apagar os dados (apenas numeros): ");
+            fflush(stdin);
+            scanf("%s", paciente.cpf);
+            cpfPadronizador();
+            strcpy(cpf, paciente.cpf);
 
-        arquivoPaciente = fopen(nomeArquivo, "r");
+            while(fread(&paciente, sizeof(dados_paciente), 1, arquivoPaciente) == 1){
+                if(strcmp(paciente.cpf, cpf) != 0){
+                    printf("\n Numero de CPF nao encontrado!\n");
+                    goto fimdeletar;
+                }
+                if (strcmp(paciente.cpf, cpf) == 0){
+                    printf("\n Nome: %s\n", paciente.nome);
+                    printf(" CPF: %s\n", paciente.cpf);
+                    printf(" Telefone: %s\n", paciente.telefone);
+                    printf(" Endereco: Rua: %s, No.: %d, %s - %s/%s\n", paciente.rua, paciente.numeroCasa, paciente.bairro, paciente.cidade, paciente.estado);
+                    printf(" CEP: %s\n", paciente.cep);
+                    printf(" Data de Nascimento: %d/%d/%d\n", paciente.diaNascimento, paciente.mesNascimento, paciente.anoNascimento);
+                    printf(" Idade: %d\n", paciente.idadePaciente);
+                    printf(" Email: %s\n", paciente.email);
+                    printf(" Data do Diagnostico: %d/%d/%d\n", paciente.diaDiagnostico, paciente.mesDiagnostico, paciente.anoDiagnostico);
+                    printf(" Diabetes: %s\n", paciente.diabetes);
+                    printf(" Hipertensao: %s\n", paciente.hipertensao);
+                    printf(" Tuberculose: %s\n", paciente.tuberculose);
+                    printf(" Obesidade: %s\n", paciente.obesidade);
+                    printf("--------------------------------------------------\n\n");
+                }else{
+                    fwrite(&paciente, sizeof(dados_paciente), 1, deletarDados);
+                }
+            }
 
-        if (arquivoPaciente == NULL){
-        printf("\n Nao foi possivel abrir o arquivo!\n");
-        printf(" Verifique se o CPF esta correto!\n\n\n");
-        system("pause");
-        return 1;
-        }
+            fclose(arquivoPaciente);
+            fclose(deletarDados);
+            printf("\n\n Esses sao os dados do paciente que deseja excluir? Digite 1 para sim ou qualquer outro numero para nao.\n");
+            fflush(stdin);
+            scanf("%d", &confirmacaoDados);
 
-        system("cls");
-        while (fgets(lerDados, 5000, arquivoPaciente) != NULL){
-            printf("%s", lerDados);
-        }
+            if(confirmacaoDados == 1){
+                if(remove("Pacientes cadastrados.bin") == 0 && rename("temp.bin", "Pacientes cadastrados.bin") == 0){
+                    printf("\n Dados deletados com sucesso!");
+                }
+            }else{
+                remove("temp.bin");
+            }
+        }        
 
-        fclose(arquivoPaciente);
-
-        printf("\n\n Esses sao os dados do paciente que deseja excluir? Digite 1 para sim ou qualquer outro numero para nao.\n");
-        fflush(stdin);
-        scanf("%d", &confirmacaoDados);
-
-        if(confirmacaoDados == 1){
-            remove(nomeArquivo);
-            quantPacientesCovid = fopen("Quantidade de pacientes com Covid19.bin", "rb");
-            fread(&id, sizeof(id), 5, quantPacientesCovid);
-            fclose(quantPacientesCovid);
-            id--;
-            quantPacientesCovid = fopen("Quantidade de pacientes com Covid19.bin", "wb");
-            fwrite(&id, sizeof(id), 5, quantPacientesCovid);
-            fclose(quantPacientesCovid);
-        }
-
+        fimdeletar:
         printf("\n Deseja excluir mais algum dado de algum paciente? Digite 1 para sim e qualquer outro numero para nao.\n");
         fflush(stdin);
         scanf("%d", &opcaoMenu);
-
     }while(opcaoMenu == 1);
 }
-//fim do código para deletar os dados dos pacientes.
+
